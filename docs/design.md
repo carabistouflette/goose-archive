@@ -16,12 +16,12 @@ GNU/PAX tar decoding is delegated to libarchive, not reimplemented here.
 
 Limits: compressed input <=16 MiB; decompressed tar <=64 MiB; entries <=4096;
 path <=1024 bytes; depth <=32; total file bytes <=64 MiB; file <=64 MiB;
-packed manifest <=4 MiB. User limits may lower these. Fixed 64 KiB copy buffer.
+packed manifest <=4 MiB. User limits may lower these. Writes use chunks of at most 64 KiB from libarchive data blocks.
 Limits bound library work/storage, not strict wall-clock time or total RSS inside
 system dependencies. Header metadata is covered by decompressed tar cap.
 
-Validate all entries and data before any filesystem mutation. Retain validated
-file offsets in immutable decompressed storage. Sort a pointer index to detect
+Validate all entries and data before any filesystem mutation. Perform a second reader pass over the same immutable decompressed storage
+for extraction; never retain libarchive data pointers. Sort a pointer index to detect
 duplicates and binary-search ancestors to reject files used as directories.
 Extraction traverses destination ancestors with directory descriptors and
 O_NOFOLLOW|O_CLOEXEC. Exclusively create root mode 0700; implicit directories 0700;
