@@ -31,8 +31,15 @@ static bool overlap(const void *a, size_t an, const void *b, size_t bn) {
     return x <= y ? y - x < an : x - y < bn;
 }
 static bool zeros(const uint8_t *p, size_t n) {
-    for (size_t i = 0; i < n; ++i) if (p[i]) return false;
-    return true;
+    /* Bounded libc comparisons avoid a branch for each padding byte.
+     * Neither input needs special alignment; never inspect beyond n bytes. */
+    static const uint8_t zero[4096] = {0};
+    while (n >= sizeof zero) {
+        if (memcmp(p, zero, sizeof zero)) return false;
+        p += sizeof zero;
+        n -= sizeof zero;
+    }
+    return !n || memcmp(p, zero, n) == 0;
 }
 static int decode(ga_input input, size_t cap, struct context *c) {
     c->tar = malloc(cap + 1);
