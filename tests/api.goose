@@ -3,6 +3,20 @@ import archive from "..";
 import os;
 import std;
 
+fn rejected(fixture: const u8[:], destination: const u8[:], expected: archive::Error) {
+    var bytes:   u8[>..]             = [];
+    var entries: archive::Entry[>..] = [];
+    let limits = archive::Limits { .. };
+    assert(read_file(".build/fixtures/small.tar.gz", bytes));
+    var result = archive::inspect(bytes, limits, entries);
+    assert(result.error == archive::Error.None && entries.len == 2);
+    bytes.clear();
+    assert(read_file(str(".build/fixtures/", fixture, ".tar.gz"), bytes));
+    result = archive::inspect(bytes, limits, entries);
+    assert(result.error == expected && entries.len == 0);
+    result = archive::extract(bytes, destination, limits);
+    assert(result.error == expected);
+}
 fn main() {
     let argv = args();
     assert(argv.len == 2);
@@ -17,8 +31,12 @@ fn main() {
         else { assert(entry.size == 11 && entry.path == "src/main.goose"); }
     }
     // Inspection paths own storage independent of the compressed source.
+    for i in bytes.len { bytes[i] = 0xaa; }
+    for entry, i in entries {
+        if i == 0 { assert(entry.path == "src"); }
+        else { assert(entry.path == "src/main.goose"); }
+    }
     bytes.clear();
-    for entry in entries { assert(entry.path.len > 0); }
     result = archive::inspect(bytes, limits, entries);
     assert(result.error == archive::Error.InvalidInput && entries.len == 0);
     assert(read_file(".build/fixtures/small.tar.gz", bytes));
@@ -36,6 +54,8 @@ fn main() {
     assert(read_file(".build/fixtures/unsafe.tar.gz", bytes));
     result = archive::inspect(bytes, limits, entries);
     assert(result.error == archive::Error.UnsafeEntry && entries.len == 0);
+    rejected("conflict", str(argv[1], "-conflict"), archive::Error.UnsafeEntry);
+    rejected("no-eof", str(argv[1], "-no-eof"), archive::Error.Malformed);
     let invalid = archive::Limits { depth: -1 };
     result = archive::inspect(bytes, invalid, entries);
     assert(result.error == archive::Error.InvalidInput);

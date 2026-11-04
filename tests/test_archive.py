@@ -59,7 +59,7 @@ class Adapter:
         if self.lib is None:
             request = struct.pack('<9q', int(destination is not None), len(data), len(dest), *values)
             response = subprocess.run([os.environ['ARCHIVE_DRIVER']], input=request + data + dest,
-                stdout=subprocess.PIPE, stderr=subprocess.PIPE, timeout=10, check=True).stdout
+                stdout=subprocess.PIPE, timeout=10, check=True).stdout
             code, *metadata = struct.unpack('<4q', response[:32])
             meta = metadata
             packed = C.create_string_buffer(response[32:])
@@ -178,6 +178,36 @@ class Tests(unittest.TestCase):
             code, _, records = self.api.call(archive(entries, fmt))
             self.assertEqual(code, 0)
             self.assertEqual(records, expected)
+
+    def test_cumulative_file_limit_and_conflict_prevalidation(self):
+        data = archive([('a', b'abc', 'f'), ('b', b'xyz', 'f')])
+        self.assertEqual(self.api.call(data, limits=[10240, 2, 3, 5, 32, 1024])[0], 2)
+        self.assertEqual(self.api.call(data, limits=[10240, 2, 3, 6, 32, 1024])[0], 0)
+        with tempfile.TemporaryDirectory() as temp:
+            destination = Path(temp) / 'out'
+            conflict = archive([('a', b'', 'f'), ('a/b', b'', 'd')])
+            self.assertEqual(self.api.call(conflict, destination)[0], 4)
+            self.assertFalse(destination.exists())
+
+    def test_sparse_extents_rejected(self):
+        # GNU old sparse: one stored byte at logical offset 0, real size 1024.
+        info = tarfile.TarInfo('sparse')
+        info.type = tarfile.GNUTYPE_SPARSE
+        info.size = 1
+        header = bytearray(info.tobuf(format=tarfile.GNU_FORMAT))
+        header[386:398] = b'00000000000\0'
+        header[398:410] = b'00000000001\0'
+        header[483:495] = b'00000002000\0'
+        header[148:156] = b'        '
+        header[148:156] = f'{sum(header):06o}\0 '.encode()
+        sample = bytes(header) + b'x' + b'\0' * 511 + b'\0' * 1024
+        self.assertEqual(self.api.call(gzip.compress(sample))[0], 4)
+        # All-hole sparse file with no stored extent cannot pass size validation.
+        header[124:136] = b'00000000000\0'
+        header[398:410] = b'00000000000\0'
+        header[148:156] = b'        '
+        header[148:156] = f'{sum(header):06o}\0 '.encode()
+        self.assertNotEqual(self.api.call(gzip.compress(bytes(header) + b'\0' * 1024))[0], 0)
 
     def test_long_paths_and_pax_override(self):
         name = 'a' * 100 + '/' + 'b' * 100 + '/' + 'c' * 100

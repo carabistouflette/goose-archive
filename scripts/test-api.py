@@ -12,3 +12,7 @@ with tempfile.TemporaryDirectory(prefix='goose-archive-') as temp:
                     [compiler, 'build', 'tests/api.goose', '-o', '.build/api'],
                     [str(root / '.build/api'), temp + '/native']):
         subprocess.run(command, cwd=root, check=True, timeout=120)
+
+    for mode in ('interpreted', 'native'):
+        for fixture in ('conflict', 'no-eof'):
+            assert not (Path(temp) / (mode + '-' + fixture)).exists()

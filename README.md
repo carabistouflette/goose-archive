@@ -12,9 +12,8 @@ decoding through a private C adapter; no subprocesses or external filters run.
 ```goose
 import archive from "../goose-archive";
 import std;
-fn main() {
-    // Applications own bounded file/network I/O and authenticity verification.
-    var compressed: u8[>..] = [];
+fn inspect_bytes(compressed: const u8[:]) {
+    // Applications supply bytes after bounded I/O and authenticity verification.
     var entries: archive::Entry[>..] = [];
     let limits = archive::Limits { tar_bytes: 16777216, entries: 4096 };
     let result = archive::inspect(compressed, limits, entries);

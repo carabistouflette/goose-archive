@@ -60,7 +60,8 @@ Name sorting costs O(entries log entries) string comparisons; ancestor checks us
 at most `depth` binary searches per entry. Decompression is performed once;
 extraction adds a second tar traversal and file writes.
 
-Symlinks, hardlinks, special files, sparse extents and discontinuous file data are
+Policy is applied to libarchive’s decoded effective file/directory types, not
+the original tar type byte. Symlinks, hardlinks, special files, sparse extents and discontinuous file data are
 rejected. Degenerate GNU sparse representations exposing no extents can be
 accepted only when their data decodes as an ordinary contiguous file; this is not
 support for sparse filesystem output. Libarchive warnings are failures. Gzip CRC,

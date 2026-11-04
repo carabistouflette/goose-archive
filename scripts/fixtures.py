@@ -13,6 +13,7 @@ samples = {
     'wide': [(f'file-{i:04}', b'hello', 'f') for i in range(1000)],
     'large': [('data', bytes(range(256)) * 16384, 'f')],
     'unsafe': [('first', b'a', 'f'), ('../escape', b'', 'f')],
+    'conflict': [('a', b'', 'f'), ('a/b', b'', 'd')],
 }
 for name, entries in samples.items():
     (root / (name + '.tar.gz')).write_bytes(archive(entries))
@@ -22,3 +23,6 @@ corpus.mkdir(exist_ok=True)
 for path in root.glob('*.tar.gz'):
     (corpus / path.name).write_bytes(path.read_bytes())
     (corpus / (path.stem + '.raw')).write_bytes(gzip.decompress(path.read_bytes()))
+
+zero_raw = gzip.decompress(archive([('zero', b'\0' * 1024, 'f')]))
+(root / 'no-eof.tar.gz').write_bytes(gzip.compress(zero_raw[:1536], mtime=0))
