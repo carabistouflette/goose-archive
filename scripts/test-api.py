@@ -14,5 +14,5 @@ with tempfile.TemporaryDirectory(prefix='goose-archive-') as temp:
         subprocess.run(command, cwd=root, check=True, timeout=120)
 
     for mode in ('interpreted', 'native'):
-        for fixture in ('conflict', 'no-eof'):
+        for fixture in ('conflict', 'no-eof', 'bad-isize'):
             assert not (Path(temp) / (mode + '-' + fixture)).exists()

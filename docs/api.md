@@ -52,8 +52,14 @@ including out-of-order entries. Implicit directories are allowed.
 Decompression allocates `tar_bytes +1` bytes without clearing them; the sentinel
 permits exact cap-boundary detection. Validation allocates entry and sort tables
 proportional to the configured entry cap (roughly4.3MiB at4096), without zeroing
-the entire tables. Goose inspection prepares/zeroes `manifest_bytes` and copies
-paths into owned entries. Peak storage also includes caller input, previous output
+the entire tables. Goose inspection prepares/zeroes at most `manifest_bytes`,
+further bounded by the entry cap and the gzip trailer's advisory decompressed
+size: `min(manifest_bytes, min(entries, ISIZE / 512) * 1034)`. Each tar entry
+needs a 512-byte header and a manifest record has at most 1024 path bytes plus
+10 overhead bytes. Native gzip decoding checks ISIZE before parsing, and native
+code independently checks actual manifest size before writing. A forged hint
+cannot authorize writes or bypass configured limits. Returned paths are copied
+into owned entries. Peak storage also includes caller input, previous output
 capacity and dependency allocations. These caps are not a total RSS or wall-clock
 limit. Tar extensions are bounded by `tar_bytes`, not the public entry count.
 Name sorting costs O(entries log entries) string comparisons; ancestor checks use

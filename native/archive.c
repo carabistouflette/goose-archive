@@ -272,8 +272,7 @@ int64_t ga_call(int64_t op, ga_input input, ga_input destination, ga_limits limi
     const int64_t caps[] = {MAX_TAR, MAX_ENTRIES, MAX_TAR, MAX_TAR, MAX_DEPTH, MAX_MANIFEST};
     for (size_t i = 0; i < 6; ++i) if (limits.data[i] < 0 || limits.data[i] > caps[i]) return INVALID;
     if ((op != 0 && op != 1) || (op == 0 && destination.len) ||
-        (op == 1 && !destination_valid(destination)) ||
-        (op == 0 && manifest.len < limits.data[5])) return INVALID;
+        (op == 1 && !destination_valid(destination))) return INVALID;
     struct context c = {0};
     c.items = malloc(((size_t)limits.data[1] + 1) * sizeof *c.items);
     c.sorted = malloc(((size_t)limits.data[1] + 1) * sizeof *c.sorted);
@@ -282,6 +281,7 @@ int64_t ga_call(int64_t op, ga_input input, ga_input destination, ga_limits limi
     else {
         result = decode(input, (size_t)limits.data[0], &c);
         if (!result) result = validate(&c, limits);
+        if (!result && op == 0 && c.packed > (size_t)manifest.len) result = LIMIT;
         if (!result && op == 1) result = extract(&c, destination);
         if (!result && op == 0) {
             size_t offset = 0;

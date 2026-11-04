@@ -56,6 +56,7 @@ fn main() {
     assert(result.error == archive::Error.UnsafeEntry && entries.len == 0);
     rejected("conflict", str(argv[1], "-conflict"), archive::Error.UnsafeEntry);
     rejected("no-eof", str(argv[1], "-no-eof"), archive::Error.Malformed);
+    rejected("bad-isize", str(argv[1], "-bad-isize"), archive::Error.Malformed);
     let invalid = archive::Limits { depth: -1 };
     result = archive::inspect(bytes, invalid, entries);
     assert(result.error == archive::Error.InvalidInput);

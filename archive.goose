@@ -36,12 +36,21 @@ fn owned_path(bytes: const u8[:]) -> u8[] {
     out.append(bytes);
     return out;
 }
+// ISIZE is only a preparation hint. Native decoding validates it and independently
+// bounds actual output before writing. A tar entry needs at least one 512-byte
+// header and its manifest record has at most 1024 path bytes + 10 bytes.
+fn manifest_capacity(input: const u8[:], limits: const Limits&) -> i64 {
+    if input.len < 4 { return 0; }
+    var tar_hint: i64 = 0;
+    for b in 4 { tar_hint |= (input[input.len - 4 + b] as i64) << (b * 8); }
+    return min(limits.manifest_bytes, min(limits.entries, tar_hint / 512) * 1034);
+}
 fn inspect(input: const u8[:], limits: const Limits&, out: Entry[>..]&) -> Status {
     out.clear();
     if !valid(limits) || input.len < 1 || input.len > 16777216 { return Status { error: Error.InvalidInput }; }
     let options = [limits.tar_bytes, limits.entries, limits.file_bytes, limits.total_bytes, limits.depth, limits.manifest_bytes];
     var packed: u8[>..] = [];
-    packed.resize(limits.manifest_bytes, 0);
+    packed.resize(manifest_capacity(input, limits), 0);
     var meta: i64[3] = [0, 0, 0];
     let code = native_call(0, input, "", options, packed[..], meta[..]);
     if code != 0 { return status(code, meta[0]); }
