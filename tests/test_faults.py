@@ -16,7 +16,7 @@ class FaultTests(unittest.TestCase):
 
     def test_short_and_interrupted_writes(self):
         for mode in (1, 2):
-            with self.subTest(mode=mode), tempfile.TemporaryDirectory() as temp:
+            with self.subTest(mode=mode), tempfile.TemporaryDirectory(dir='/tmp') as temp:
                 target = Path(temp) / 'out'
                 code, meta, _ = self.api.call(self.data, target, fault=mode)
                 self.assertEqual(code, 0)
@@ -28,7 +28,7 @@ class FaultTests(unittest.TestCase):
         before = len(os.listdir('/proc/self/fd'))
         for mode, error in ((3, errno.ENOSPC), (4, errno.EIO), (5, errno.EIO)):
             for _ in range(10):
-                with self.subTest(mode=mode), tempfile.TemporaryDirectory() as temp:
+                with self.subTest(mode=mode), tempfile.TemporaryDirectory(dir='/tmp') as temp:
                     target = Path(temp) / 'out'
                     code, meta, _ = self.api.call(self.data, target, fault=mode)
                     self.assertEqual((code, meta), (5, [error, 0, 0]))
@@ -43,7 +43,7 @@ class FaultTests(unittest.TestCase):
                                      (7, range(1, 3), errno.ENOSPC),
                                      (8, (1,), errno.EMFILE)):
             for at in indices:
-                with self.subTest(mode=mode, at=at), tempfile.TemporaryDirectory() as temp:
+                with self.subTest(mode=mode, at=at), tempfile.TemporaryDirectory(dir='/tmp') as temp:
                     target = Path(temp) / 'out'
                     code, meta, _ = self.api.call(self.data, target, fault=mode, at=at)
                     self.assertEqual((code, meta), (5, [error, 0, 0]))

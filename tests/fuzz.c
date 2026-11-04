@@ -24,7 +24,7 @@ static void inspect(const uint8_t *input, size_t size) {
     if (code) assert(meta[1] == 0 && meta[2] == 0);
     else {
         size_t offset = 0;
-        assert(meta[1] >= 0 && (uint64_t)meta[1] <= capacity && meta[2] <= 128);
+        assert(meta[1] >= 0 && (uint64_t)meta[1] <= capacity && meta[2] >= 0 && meta[2] <= 128);
         for (int64_t i = 0; i < meta[2]; ++i) {
             assert(offset + 10 <= (size_t)meta[1]);
             assert(out[offset] <= 1);

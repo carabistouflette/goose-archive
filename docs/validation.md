@@ -14,7 +14,7 @@ make fuzz FUZZ_RUNS=10000
 make bench GOOSE=/absolute/path/to/pinned/goose BENCH_ITERATIONS=200
 ```
 
-The Python suite has14 test groups. Its independent `tarfile` producer covers
+The Python suite has 18 test groups. Its independent `tarfile` producer covers
 USTAR, GNU and PAX;80 seeded generated documents compare exact returned paths,
 sizes and kinds. Further cases cover long paths/PAX overrides, corruption and
 truncation at every gzip prefix, duplicate names, out-of-order file ancestors,
@@ -32,7 +32,7 @@ asserts those rejected archives created no destination. A standalone local Git
 clone passes check/test using the same pinned external compiler, without files
 from the coordination workspace.
 
-GCC and Clang ASan/UBSan runs execute the same14 native test groups through an
+GCC and Clang ASan/UBSan runs execute the same 18 native test groups through an
 instrumented subprocess driver, plus direct invalid/alias ABI checks. Leak
 detection is enabled; driver errors print sanitizer diagnostics. These runs
 instrument this adapter, not the installed system zlib/libarchive libraries or
@@ -54,3 +54,29 @@ integration. They identified an ancestor-index mutation and a missing tar EOF
 boundary check; both were corrected with public and native regression tests.
 Final security and quality reviews found no remaining implementation blocker;
 validation follow-up confirmed all requested test improvements were addressed.
+
+## Additional security and performance audit
+
+Independent adversarial probes exercised every raw tar type byte, long GNU/PAX
+extension chains, large PAX xattr/ACL sets, and extraction syscall failures. No
+new security bypass or production correctness defect was found in those probes.
+These finite probes are not an assurance that all hostile archives are safe.
+
+Permanent tests now cover interrupted/short/zero writes, ENOSPC, file-close
+failure, open/mkdir/descriptor-duplication failures, exact error metadata and
+stopping before later entries. Repeated native fault calls check descriptor
+stability; the instrumented driver also checks its own descriptor count on every
+call. Link-time fault wrappers are test-only and absent from the production
+CMake target.
+
+Inspection preparation uses a bounded gzip trailer hint, without trusting it
+for validation or writes. Regressions check forged ISIZE values, exact and
+undersized native buffers, unchanged output canaries on failure, and the Goose
+error/ownership contract. The fuzz target applies the same advisory capacity
+bound with a tail canary. It also repairs the first tar header checksum in a
+separate mutation path so changed paths/types/sizes reach parser policy checks.
+
+Dependency security remains the responsibility of maintained installed packages:
+track [libarchive's security advisories](https://github.com/libarchive/libarchive/security/advisories)
+and [zlib releases](https://github.com/madler/zlib/releases), including distribution
+backports. Build minimums are not declarations of vulnerability-free versions.
