@@ -41,7 +41,7 @@ they are not themselves a whole-program sanitizer build.
 
 The libFuzzer target checks compressed bytes directly and also wraps mutations
 as valid gzip so they can reach tar parsing without repairing gzip checksums.
-It asserts output record boundaries and error metadata. Campaign size10000,
+It asserts output record boundaries and error metadata. Default campaign size10000,
 seed219, input cap1MiB; expanded tar cap2MiB and128 entries in the harness.
 Generated compressed and raw tar fixtures seed it. A persistent corpus means
 seed alone does not reproduce every mutation sequence. Fuzzing exercises inspection,
@@ -80,3 +80,6 @@ Dependency security remains the responsibility of maintained installed packages:
 track [libarchive's security advisories](https://github.com/libarchive/libarchive/security/advisories)
 and [zlib releases](https://github.com/madler/zlib/releases), including distribution
 backports. Build minimums are not declarations of vulnerability-free versions.
+
+The [audit record](../bench/results/2026-11-04-audit/README.md) preserves the
+clean-source paired measurements and extended fuzz campaign results.

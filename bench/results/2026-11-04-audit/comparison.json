@@ -1,0 +1,186 @@
+{
+  "source": "463a18cb4f6b37d940810216e8a346cd0cbcbf32",
+  "source_dirty": false,
+  "compiler_revision": "eadca409f68210893f366e60d0c2f0dc29a339be",
+  "toolchain": {
+    "cc": {
+      "name": "gcc",
+      "style": "cc",
+      "path": "/usr/bin/cc",
+      "cxx": "/usr/bin/g++",
+      "version": "20260810",
+      "desc": "gcc 20260810",
+      "id": "gcc-20260810-a920ca84",
+      "how": "on PATH"
+    },
+    "cmake": {
+      "path": "/usr/bin/cmake",
+      "version": "4.4.5"
+    },
+    "git": {
+      "path": "/usr/bin/git",
+      "version": "2.56.0"
+    },
+    "builtin": []
+  },
+  "goose_version": "goose eadca40 (runtime 3025e5810379)",
+  "goose_binary_sha256": "7ffde13da95fbbdaa15b27419494fc9b71f2c91c0b4c4d732f51815e928a4b56",
+  "platform": "Linux-7.2.11-arch1-1-x86_64-with-glibc2.44",
+  "machine": "x86_64",
+  "cpu_affinity": 0,
+  "cpu_model": "Intel(R) Core(TM) Ultra 7 258V",
+  "dependencies": {
+    "libarchive": "3.8.11",
+    "zlib": "1.3.2"
+  },
+  "build": "goose build bench/bench.goose -O2; native CMake Release (-O3 -DNDEBUG with GCC)",
+  "iterations": 200,
+  "runs": 9,
+  "units": "ns per inspect call",
+  "samples": {
+    "small/tight": [
+      30297.37,
+      32684.775,
+      30078.99,
+      28238.96,
+      29534.055,
+      28407.73,
+      29531.28,
+      29322.05,
+      31560.38
+    ],
+    "small/default": [
+      31355.85,
+      84512.495,
+      30464.91,
+      31043.9,
+      30095.17,
+      28369.605,
+      30283.37,
+      30360.65,
+      32079.585
+    ],
+    "small/max": [
+      52657.175,
+      52754.62,
+      48344.175,
+      50320.65,
+      51776.935,
+      52111.455,
+      55199.705,
+      55291.22,
+      55186.695
+    ],
+    "wide/default": [
+      3006308.445,
+      2932563.64,
+      3024763.78,
+      2980622.49,
+      2923952.275,
+      2909281.63,
+      3028609.015,
+      3074623.755,
+      3065155.875
+    ],
+    "large/default": [
+      5346198.54,
+      5305080.88,
+      5417061.315,
+      5461533.74,
+      5379413.865,
+      5302776.35,
+      5537811.595,
+      5628858.115,
+      5629867.305
+    ]
+  },
+  "medians": {
+    "small/tight": 29534.055,
+    "small/default": 30464.91,
+    "small/max": 52657.175,
+    "wide/default": 3006308.445,
+    "large/default": 5417061.315
+  },
+  "checksums": {
+    "large/default": 838861800,
+    "wide/default": 3000000,
+    "small/default": 6000,
+    "small/tight": 6000,
+    "small/max": 6000
+  },
+  "binary_sha256": {
+    "candidate": "a00ed6c995a858eb8135587e67b3f60b3a0e598549751e91145d67ee076de0e3",
+    "baseline": "796272440855376709c81a2e9b3c2079adfd052a5696b8cdb7e3120faa65fff5"
+  },
+  "fixture_sha256": {
+    "small": "6bf6d87f1a5c3ad6984008d1fc293ad2cc9ad2eadb2f91bf31241374e01bf67a",
+    "wide": "3683d2382515d1734d85a4c95e064288b697bd57797367f4925b9f2f58850992",
+    "large": "5d33c31f8814f2e638ef8cbd53707a496bb05c645026e3d24fe3b04a04fd94ef"
+  },
+  "harness_sha256": "8ec1392d9617347b3a2dbb3760f663c153e22b7cbe7e773af5a0a78d1f99dae8",
+  "baseline_revision": "fa0629139705edb5ac5dac4e077536b8ba43c16e",
+  "baseline_samples": {
+    "small/tight": [
+      29731.715,
+      30826.67,
+      30227.54,
+      29638.815,
+      29625.56,
+      29741.53,
+      30977.03,
+      27518.31,
+      30966.39
+    ],
+    "small/default": [
+      78449.45,
+      191861.375,
+      77926.095,
+      76039.305,
+      77161.38,
+      76567.715,
+      77335.465,
+      80602.51,
+      80812.965
+    ],
+    "small/max": [
+      383902.215,
+      371247.87,
+      380763.87,
+      363440.66,
+      361336.34,
+      367193.27,
+      393229.515,
+      372153.15,
+      374301.2
+    ],
+    "wide/default": [
+      3046385.555,
+      2983875.425,
+      3195353.945,
+      2907794.055,
+      2917370.89,
+      2908678.815,
+      3081199.7,
+      3031002.255,
+      3006273.01
+    ],
+    "large/default": [
+      5363415.025,
+      5337286.65,
+      5323518.075,
+      5332605.485,
+      5345788.955,
+      5374621.97,
+      5371284.765,
+      5646194.06,
+      5679823.125
+    ]
+  },
+  "baseline_medians": {
+    "small/tight": 29741.53,
+    "small/default": 77926.095,
+    "small/max": 372153.15,
+    "wide/default": 3006273.01,
+    "large/default": 5363415.025
+  }
+}

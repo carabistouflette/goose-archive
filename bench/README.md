@@ -34,3 +34,6 @@ seeded randomized binary order, with expected checksums verified for both.
 Raw samples for each binary, full baseline revision, fixture/harness/binary
 hashes and the selected toolchain are retained. These are warmed public API
 inspection costs, not kernel-only timings. No filesystem extraction is timed.
+
+The [paired performance/security audit](results/2026-11-04-audit/README.md)
+records a fresh baseline comparison and strengthened validation.
