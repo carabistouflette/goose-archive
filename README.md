@@ -23,8 +23,13 @@ fn inspect_bytes(compressed: const u8[:]) {
 }
 ```
 
-Use a sibling local checkout with the import above. Publication and remote import
-pins are pending; this repository does not claim an available public remote.
+Use a sibling local checkout with the import above. Public repository:
+[carabistouflette/goose-archive](https://github.com/carabistouflette/goose-archive).
+For remote imports, pin a reviewed full commit, for example:
+
+```goose
+import archive from "carabistouflette/goose-archive@d61ef3ad780e1c13fc3b5d390362f07ad5de8978";
+```
 A runnable file-reading example is [examples/inspect.goose](examples/inspect.goose).
 
 ## Build and validate
@@ -35,9 +40,11 @@ required for fuzzing. Use maintained system dependency packages with security
 fixes; minimum build versions are not a security guarantee. Debian/Ubuntu:
 `build-essential cmake git python3 pkg-config libarchive-dev zlib1g-dev clang`.
 
-From a standalone clone or copy of this directory:
+From a standalone clone:
 
 ```sh
+git clone https://github.com/carabistouflette/goose-archive.git
+cd goose-archive
 make setup
 make format check test
 make sanitize SANITIZER_CC=gcc

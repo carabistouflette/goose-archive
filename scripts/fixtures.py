@@ -17,12 +17,13 @@ samples = {
 }
 for name, entries in samples.items():
     (root / (name + '.tar.gz')).write_bytes(archive(entries))
+
+zero_raw = gzip.decompress(archive([('zero', b'\0' * 1024, 'f')]))
+(root / 'no-eof.tar.gz').write_bytes(gzip.compress(zero_raw[:1536], mtime=0))
+
 # Preserve raw inputs for fuzzing the gzip and tar boundaries.
 corpus = root.parent / 'fuzz-corpus'
 corpus.mkdir(exist_ok=True)
 for path in root.glob('*.tar.gz'):
     (corpus / path.name).write_bytes(path.read_bytes())
     (corpus / (path.stem + '.raw')).write_bytes(gzip.decompress(path.read_bytes()))
-
-zero_raw = gzip.decompress(archive([('zero', b'\0' * 1024, 'f')]))
-(root / 'no-eof.tar.gz').write_bytes(gzip.compress(zero_raw[:1536], mtime=0))

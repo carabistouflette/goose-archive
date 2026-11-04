@@ -32,7 +32,7 @@ immutable during calls. No pointers or descriptors are retained after return.
 
 ## Limits
 
-Compressed input must contain1..16MiB. Every configurable limit accepts zero and
+Compressed input must contain 1 byte to 16 MiB. Every configurable limit accepts zero and
 has a hard maximum. Zero means no capacity, not unlimited.
 
 | Limits field | Default | Maximum | Counts |

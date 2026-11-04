@@ -1,7 +1,8 @@
 # Validation
 
 Validated locally on Linux x86-64 with the exact compiler in GOOSE_REVISION.
-GitHub CI is configured but has not run for this unpublished local repository.
+The public [CI workflow](https://github.com/carabistouflette/goose-archive/actions/workflows/ci.yml)
+shows the current remote validation status; the results below describe local runs.
 
 Commands:
 
