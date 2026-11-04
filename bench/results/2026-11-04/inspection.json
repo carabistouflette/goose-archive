@@ -1,0 +1,79 @@
+{
+  "source": "06cf713ad6b80366d312fe5b56697970e92b0030",
+  "source_dirty": false,
+  "compiler_revision": "eadca409f68210893f366e60d0c2f0dc29a339be",
+  "platform": "Linux-7.2.11-arch1-1-x86_64-with-glibc2.44",
+  "machine": "x86_64",
+  "cpu_affinity": 0,
+  "cpu_model": "Intel(R) Core(TM) Ultra 7 258V",
+  "cc": "cc (GCC) 16.2.1 20260810",
+  "dependencies": {
+    "libarchive": "3.8.11",
+    "zlib": "1.3.2"
+  },
+  "build": "goose build bench/bench.goose -O2; private C target uses compiler CMake defaults",
+  "iterations": 200,
+  "runs": 7,
+  "units": "ns per inspect call",
+  "samples": {
+    "small/tight": [
+      27320.375,
+      27625.17,
+      28259.26,
+      27649.325,
+      27732.215,
+      29213.1,
+      28081.535
+    ],
+    "small/default": [
+      69926.47,
+      74762.385,
+      71064.295,
+      75106.08,
+      76445.12,
+      81220.87,
+      73470.84
+    ],
+    "small/max": [
+      348743.865,
+      348027.39,
+      351242.95,
+      365627.505,
+      351750.595,
+      374392.04,
+      349490.885
+    ],
+    "wide/default": [
+      2818728.34,
+      2868209.28,
+      2794742.3,
+      2840705.66,
+      2801473.45,
+      2980272.515,
+      2841607.185
+    ],
+    "large/default": [
+      5265075.88,
+      5276278.13,
+      5278847.6,
+      5275351.27,
+      5281071.22,
+      5408086.515,
+      5416445.7
+    ]
+  },
+  "medians": {
+    "small/tight": 27732.215,
+    "small/default": 74762.385,
+    "small/max": 351242.95,
+    "wide/default": 2840705.66,
+    "large/default": 5278847.6
+  },
+  "checksums": {
+    "large/default": 838861800,
+    "wide/default": 3000000,
+    "small/default": 6000,
+    "small/tight": 6000,
+    "small/max": 6000
+  }
+}

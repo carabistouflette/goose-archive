@@ -15,3 +15,6 @@ versions and Git provenance in `.build/benchmark.json`. No competing library
 comparison, allocation count, extraction throughput, cold latency, wall-clock
 limit, or universal throughput claim. Shared-machine load and CPU frequency can
 affect results. Preserve raw results before making performance claims.
+
+A recorded clean-source run is available in
+[2026-11-04 results](results/2026-11-04/README.md).
