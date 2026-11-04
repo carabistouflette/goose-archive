@@ -40,30 +40,39 @@ def archive(entries=(), fmt=tarfile.USTAR_FORMAT):
     return gzip.compress(out.getvalue(), mtime=0)
 
 class Adapter:
-    def __init__(self):
+    def __init__(self, faults=False):
+        self.faults = faults
         if os.environ.get('ARCHIVE_DRIVER'):
             self.lib = None
             return
-        self.lib = C.CDLL(str(Path(os.environ.get('ARCHIVE_SO', ROOT / '.build/libarchive-test.so')).resolve()))
+        name = '.build/libarchive-faults.so' if faults else '.build/libarchive-test.so'
+        self.lib = C.CDLL(str(Path(os.environ.get('ARCHIVE_SO', ROOT / name)).resolve()))
+        if faults:
+            self.lib.ga_test_fault.argtypes = [C.c_int, C.c_int]
+            self.lib.ga_test_fault.restype = None
         self.lib.ga_call.argtypes = [C.c_int64, Slice, Slice, Slice, Slice, Slice]
         self.lib.ga_call.restype = C.c_int64
 
-    def call(self, data, destination=None, limits=None):
+    def call(self, data, destination=None, limits=None, capacity=None, fault=0, at=1):
         values = limits or [16777216, 4096, 16777216, 16777216, 32, 1048576]
         options = (C.c_int64 * 6)(*values)
         meta = (C.c_int64 * 3)(-1, -1, -1)
-        packed = C.create_string_buffer(values[5] if destination is None else 0)
+        capacity = values[5] if capacity is None else capacity
+        packed = C.create_string_buffer(capacity if destination is None else 0)
         source = C.create_string_buffer(data)
         dest = os.fsencode(destination) if destination is not None else b''
         target = C.create_string_buffer(dest)
         if self.lib is None:
-            request = struct.pack('<9q', int(destination is not None), len(data), len(dest), *values)
+            request = struct.pack('<10q', int(destination is not None), len(data), len(dest), *values, capacity)
             response = subprocess.run([os.environ['ARCHIVE_DRIVER']], input=request + data + dest,
-                stdout=subprocess.PIPE, timeout=10, check=True).stdout
+                stdout=subprocess.PIPE, timeout=10, check=True,
+                env={**os.environ, 'GA_TEST_FAULT': str(fault), 'GA_TEST_AT': str(at)}).stdout
             code, *metadata = struct.unpack('<4q', response[:32])
             meta = metadata
             packed = C.create_string_buffer(response[32:])
         else:
+            if self.faults:
+                self.lib.ga_test_fault(fault, at)
             code = self.lib.ga_call(int(destination is not None), Slice(C.addressof(source), len(data)),
             Slice(C.addressof(target), len(dest)), Slice(C.addressof(options), 6),
             Slice(C.addressof(packed), len(packed)), Slice(C.addressof(meta), 3))
@@ -227,6 +236,25 @@ class Tests(unittest.TestCase):
         self.assertEqual(self.api.call(data, limits=[1048576, 10, 4194304, 4194304, 32, 1024])[0], 2)
         raw = gzip.decompress(archive([('large', b'x' * 2048, 'f')]))
         self.assertEqual(self.api.call(gzip.compress(raw[:1024] + b'\0' * 1024))[0], 3)
+
+    def test_short_manifest_and_forged_size_hint(self):
+        data = archive([('a/b', b'hello', 'f')])
+        self.assertEqual(self.api.call(data, capacity=13)[0], 0)
+        for capacity in (0, 1, 12):
+            code, meta, records = self.api.call(data, capacity=capacity)
+            self.assertEqual((code, meta, records), (2, [0, 0, 0], []))
+        for size in (0, 1, 512, 0xffffffff):
+            forged = data[:-4] + size.to_bytes(4, 'little')
+            self.assertEqual(self.api.call(forged, capacity=0)[0], 3)
+        if self.api.lib is not None:
+            source = C.create_string_buffer(data)
+            output = C.create_string_buffer(b'Z' * 12, 12)
+            limits = (C.c_int64 * 6)(10240, 2, 5, 5, 32, 1024)
+            meta = (C.c_int64 * 3)()
+            code = self.api.lib.ga_call(0, Slice(C.addressof(source), len(data)), Slice(None, 0),
+                Slice(C.addressof(limits), 6), Slice(C.addressof(output), 12), Slice(C.addressof(meta), 3))
+            self.assertEqual(code, 2)
+            self.assertEqual(output.raw, b'Z' * 12)
 
     def test_native_invalid_and_overlap(self):
         if self.api.lib is None:
