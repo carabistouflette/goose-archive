@@ -4,8 +4,11 @@ import ctypes as C
 import gzip
 import io
 import os
+import random
 from pathlib import Path
 import stat
+import struct
+import subprocess
 import tarfile
 import tempfile
 import unittest
@@ -38,6 +41,9 @@ def archive(entries=(), fmt=tarfile.USTAR_FORMAT):
 
 class Adapter:
     def __init__(self):
+        if os.environ.get('ARCHIVE_DRIVER'):
+            self.lib = None
+            return
         self.lib = C.CDLL(str(Path(os.environ.get('ARCHIVE_SO', ROOT / '.build/libarchive-test.so')).resolve()))
         self.lib.ga_call.argtypes = [C.c_int64, Slice, Slice, Slice, Slice, Slice]
         self.lib.ga_call.restype = C.c_int64
@@ -50,7 +56,15 @@ class Adapter:
         source = C.create_string_buffer(data)
         dest = os.fsencode(destination) if destination is not None else b''
         target = C.create_string_buffer(dest)
-        code = self.lib.ga_call(int(destination is not None), Slice(C.addressof(source), len(data)),
+        if self.lib is None:
+            request = struct.pack('<9q', int(destination is not None), len(data), len(dest), *values)
+            response = subprocess.run([os.environ['ARCHIVE_DRIVER']], input=request + data + dest,
+                stdout=subprocess.PIPE, stderr=subprocess.PIPE, timeout=10, check=True).stdout
+            code, *metadata = struct.unpack('<4q', response[:32])
+            meta = metadata
+            packed = C.create_string_buffer(response[32:])
+        else:
+            code = self.lib.ga_call(int(destination is not None), Slice(C.addressof(source), len(data)),
             Slice(C.addressof(target), len(dest)), Slice(C.addressof(options), 6),
             Slice(C.addressof(packed), len(packed)), Slice(C.addressof(meta), 3))
         records = []
@@ -83,7 +97,9 @@ class Tests(unittest.TestCase):
         for name in ('/absolute', '../outside', 'a/../b', './file', 'a//b', 'a\\b',
                      'C:file', 'a/./b', 'a\nb', 'é', 'x' * 1025):
             with self.subTest(name=name):
-                self.assertEqual(self.api.call(archive([(name, b'a', 'f')], tarfile.PAX_FORMAT))[0], 4)
+                code = self.api.call(archive([(name, b'a', 'f')], tarfile.PAX_FORMAT))[0]
+                # In the C locale libarchive rejects Unicode before path policy.
+                self.assertIn(code, (3, 4) if name == 'é' else (4,))
         for kind in ('s', 'h', 'p'):
             self.assertEqual(self.api.call(archive([('entry', b'', kind)]))[0], 4)
 
@@ -147,6 +163,53 @@ class Tests(unittest.TestCase):
                 self.assertEqual(stat.S_IMODE(path.stat().st_mode), mode)
             self.assertEqual(self.api.call(data, destination)[0], 5)
             self.assertEqual((destination / 'data').read_bytes(), b'contents')
+
+    def test_generated_valid_documents(self):
+        rng = random.Random(219)
+        for sample in range(80):
+            entries = []
+            expected = []
+            for i in range(rng.randrange(1, 20)):
+                name = f'dir-{i}/file-{sample}'
+                payload = rng.randbytes(rng.randrange(0, 2048))
+                entries.append((name, payload, 'f'))
+                expected.append((name, len(payload), 0))
+            fmt = (tarfile.USTAR_FORMAT, tarfile.GNU_FORMAT, tarfile.PAX_FORMAT)[sample % 3]
+            code, _, records = self.api.call(archive(entries, fmt))
+            self.assertEqual(code, 0)
+            self.assertEqual(records, expected)
+
+    def test_long_paths_and_pax_override(self):
+        name = 'a' * 100 + '/' + 'b' * 100 + '/' + 'c' * 100
+        for fmt in (tarfile.GNU_FORMAT, tarfile.PAX_FORMAT):
+            code, _, entries = self.api.call(archive([(name, b'x', 'f')], fmt))
+            self.assertEqual(code, 0)
+            self.assertEqual(entries, [(name, 1, 0)])
+        out = io.BytesIO()
+        with tarfile.open(fileobj=out, mode='w', format=tarfile.PAX_FORMAT) as tar:
+            info = tarfile.TarInfo('safe')
+            info.pax_headers = {'path': '../escape'}
+            tar.addfile(info)
+        self.assertEqual(self.api.call(gzip.compress(out.getvalue()))[0], 4)
+
+    def test_decompression_bomb_and_payload_truncation(self):
+        data = archive([('large', b'0' * 2097152, 'f')])
+        self.assertEqual(self.api.call(data, limits=[1048576, 10, 4194304, 4194304, 32, 1024])[0], 2)
+        raw = gzip.decompress(archive([('large', b'x' * 2048, 'f')]))
+        self.assertEqual(self.api.call(gzip.compress(raw[:1024] + b'\0' * 1024))[0], 3)
+
+    def test_native_invalid_and_overlap(self):
+        if self.api.lib is None:
+            subprocess.run([os.environ['ARCHIVE_DRIVER'], '--selftest'], check=True, timeout=10)
+            return
+        options = (C.c_int64 * 6)(10240, 1, 10, 10, 2, 100)
+        meta = (C.c_int64 * 3)(11, 22, 33)
+        source = C.create_string_buffer(100)
+        empty = Slice(None, 0)
+        code = self.api.lib.ga_call(0, Slice(C.addressof(source), 100), empty,
+            Slice(C.addressof(options), 6), Slice(C.addressof(source), 100), Slice(C.addressof(meta), 3))
+        self.assertEqual(code, 1)
+        self.assertEqual(list(meta), [11, 22, 33])
 
     def test_prevalidation_and_symlink_parent(self):
         with tempfile.TemporaryDirectory() as temp:

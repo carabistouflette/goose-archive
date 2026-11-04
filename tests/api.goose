@@ -32,6 +32,7 @@ fn main() {
     var output: u8[>..] = [];
     assert(read_file(str(argv[1], "/src/main.goose"), output));
     assert(output == "hello\0world");
+    bytes.clear();
     assert(read_file(".build/fixtures/unsafe.tar.gz", bytes));
     result = archive::inspect(bytes, limits, entries);
     assert(result.error == archive::Error.UnsafeEntry && entries.len == 0);
