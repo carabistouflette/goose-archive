@@ -36,8 +36,8 @@ def digest(path):
 
 cpu = min(os.sched_getaffinity(0))
 os.sched_setaffinity(0, {cpu})
-cases = [('small', 'tight'), ('small', 'default'), ('small', 'max'), ('wide', 'default'), ('large', 'default')]
-expected = {'small': 30, 'wide': 15000, 'large': 4194309}
+cases = [('small', 'tight'), ('small', 'default'), ('small', 'max'), ('wide', 'default'), ('large', 'default'), ('padded', 'default')]
+expected = {'small': 30, 'wide': 15000, 'large': 4194309, 'padded': 30}
 binaries = {'candidate': ROOT / '.build/bench'}
 if args.baseline:
     binaries['baseline'] = args.baseline.resolve()

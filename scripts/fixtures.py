@@ -22,6 +22,8 @@ zero_raw = gzip.decompress(archive([('zero', b'\0' * 1024, 'f')]))
 (root / 'no-eof.tar.gz').write_bytes(gzip.compress(zero_raw[:1536], mtime=0))
 
 small = (root / 'small.tar.gz').read_bytes()
+padded = gzip.decompress(small).ljust(4 * 1024 * 1024, b'\0')
+(root / 'padded.tar.gz').write_bytes(gzip.compress(padded, mtime=0))
 (root / 'bad-isize.tar.gz').write_bytes(small[:-4] + (512).to_bytes(4, 'little'))
 
 # Preserve raw inputs for fuzzing the gzip and tar boundaries.

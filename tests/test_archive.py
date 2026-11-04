@@ -159,6 +159,31 @@ class Tests(unittest.TestCase):
         corrupt[0] ^= 1
         self.assertEqual(self.api.call(gzip.compress(corrupt))[0], 3)
 
+    def test_padding_scan_boundaries_and_prevalidation(self):
+        for entries in ([], [('zero', b'\0' * 1024, 'f')]):
+            raw = gzip.decompress(archive(entries))
+            start = 1536 if entries else 0
+            raw = raw.ljust(16384, b'\0')
+            self.assertEqual(self.api.call(gzip.compress(raw, mtime=0))[0], 0)
+            offsets = {0, 1, 7, 8, 15, 16, 31, 32, 63, 64, 127, 128,
+                       511, 512, 513, 1023, 1024, 1025, 4095, 4096, 4097,
+                       8191, 8192, 8193, len(raw) - start - 1025}
+            with tempfile.TemporaryDirectory() as temp:
+                destination = Path(temp) / 'out'
+                for offset in sorted(offsets):
+                    corrupt = bytearray(raw)
+                    corrupt[start + offset] = 1
+                    # Final two zero blocks stay intact: exercise the full scan.
+                    sample = gzip.compress(corrupt, mtime=0)
+                    with self.subTest(entries=bool(entries), offset=offset):
+                        code, meta, records = self.api.call(sample)
+                        self.assertEqual((code, meta, records), (3, [0, 0, 0], []))
+                        self.assertEqual(self.api.call(sample, destination)[0], 3)
+                        self.assertFalse(destination.exists())
+        raw = b'\0' * 67108864
+        self.assertEqual(self.api.call(gzip.compress(raw, mtime=0),
+            limits=[len(raw), 0, 0, 0, 0, 0])[0], 0)
+
     def test_extraction_permissions_content_and_no_overwrite(self):
         data = archive([('src/run', b'#!/bin/sh\n', 'x'), ('src/', b'', 'd'),
                         ('data', b'contents', 'f')])
