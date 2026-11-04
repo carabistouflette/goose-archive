@@ -1,0 +1,21 @@
+# To display the perf.data header info, please use --header/--header-only options.
+#
+#
+# Total Lost Samples: 0
+#
+# Samples: 15K of event 'cpu_core/cycles/Pu'
+# Event count (approx.): 5729846537
+#
+# Overhead  Command          Shared Object           Symbol                                  
+# ........  ...............  ......................  ........................................
+#
+    44.34%  bench-padding-b  libz.so.1.3.2           [.] crc32_z
+    26.77%  bench-padding-b  bench-padding-baseline  [.] ga_call
+     8.80%  bench-padding-b  libz.so.1.3.2           [.] 0x0000000000003a98
+     8.23%  bench-padding-b  libz.so.1.3.2           [.] 0x0000000000003a8a
+     7.96%  bench-padding-b  libz.so.1.3.2           [.] 0x0000000000003aab
+
+
+#
+# (Tip: Treat branches as callchains: perf record -b ... ; perf report --branch-history)
+#

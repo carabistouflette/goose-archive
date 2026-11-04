@@ -14,7 +14,7 @@ make fuzz FUZZ_RUNS=10000
 make bench GOOSE=/absolute/path/to/pinned/goose BENCH_ITERATIONS=200
 ```
 
-The Python suite has 18 test groups. Its independent `tarfile` producer covers
+The Python suite has 19 test groups. Its independent `tarfile` producer covers
 USTAR, GNU and PAX;80 seeded generated documents compare exact returned paths,
 sizes and kinds. Further cases cover long paths/PAX overrides, corruption and
 truncation at every gzip prefix, duplicate names, out-of-order file ancestors,
@@ -32,7 +32,7 @@ asserts those rejected archives created no destination. A standalone local Git
 clone passes check/test using the same pinned external compiler, without files
 from the coordination workspace.
 
-GCC and Clang ASan/UBSan runs execute the same 18 native test groups through an
+GCC and Clang ASan/UBSan runs execute the same 19 native test groups through an
 instrumented subprocess driver, plus direct invalid/alias ABI checks. Leak
 detection is enabled; driver errors print sanitizer diagnostics. These runs
 instrument this adapter, not the installed system zlib/libarchive libraries or
@@ -83,3 +83,16 @@ backports. Build minimums are not declarations of vulnerability-free versions.
 
 The [audit record](../bench/results/2026-11-04-audit/README.md) preserves the
 clean-source paired measurements and extended fuzz campaign results.
+
+## Padding scan follow-up
+
+The wrapper now checks trailing zero bytes with bounded libc comparisons. Native
+regressions cover full chunks, partial final chunks, corruption around chunk
+boundaries and late in the padding while the final two zero blocks remain intact.
+Each malformed sample must fail inspection and extraction before any destination
+is created. Empty archives, zero-filled file data, and the inclusive 64MiB tar
+limit are also exercised. Two independent reviewers found no remaining issue in
+this change. This pass did not investigate libarchive internals.
+
+See the [measurement and validation record](../bench/results/2026-11-04-padding/README.md)
+for the matched public-call comparison and the checks completed for this change.

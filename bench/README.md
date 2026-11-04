@@ -10,7 +10,7 @@ preparation and ownership copies. Each call's old output clearing is included.
 Checksums prevent dead results. Two warmup calls precede sampling.
 
 Workloads: tiny two-entry archive with tight/default/max limits;1000 files;
-4MiB compressible payload. The cap variants expose preparation/allocation costs.
+4MiB compressible payload; small archive padded to 4MiB with zeros. The cap variants expose preparation/allocation costs.
 Results are ns/call with raw samples, medians, CPU/platform, dependency/compiler
 versions, the selected Goose toolchain, actual Goose version/binary hash and Git provenance in `.build/benchmark.json`. No competing library
 comparison, allocation count, extraction throughput, cold latency, wall-clock
@@ -37,3 +37,6 @@ inspection costs, not kernel-only timings. No filesystem extraction is timed.
 
 The [paired performance/security audit](results/2026-11-04-audit/README.md)
 records a fresh baseline comparison and strengthened validation.
+
+The [padding scan audit](results/2026-11-04-padding/README.md) records a
+paired comparison of bounded libc comparisons against the original byte scan.

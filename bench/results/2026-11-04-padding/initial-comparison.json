@@ -1,0 +1,212 @@
+{
+  "source": "c4d85defc66ff59227c986069971677e8e0d4abd",
+  "source_dirty": false,
+  "compiler_revision": "eadca409f68210893f366e60d0c2f0dc29a339be",
+  "toolchain": {
+    "cc": {
+      "name": "gcc",
+      "style": "cc",
+      "path": "/usr/bin/cc",
+      "cxx": "/usr/bin/g++",
+      "version": "20260810",
+      "desc": "gcc 20260810",
+      "id": "gcc-20260810-a920ca84",
+      "how": "on PATH"
+    },
+    "cmake": {
+      "path": "/usr/bin/cmake",
+      "version": "4.4.5"
+    },
+    "git": {
+      "path": "/usr/bin/git",
+      "version": "2.56.0"
+    },
+    "builtin": []
+  },
+  "goose_version": "goose eadca40 (runtime 3025e5810379)",
+  "goose_binary_sha256": "d6992f984453e28b1e9fc2540236063c0c9db67634a99b57a9a46ea58704c313",
+  "platform": "Linux-7.2.11-arch1-1-x86_64-with-glibc2.44",
+  "machine": "x86_64",
+  "cpu_affinity": 0,
+  "cpu_model": "Intel(R) Core(TM) Ultra 7 258V",
+  "dependencies": {
+    "libarchive": "3.8.11",
+    "zlib": "1.3.2"
+  },
+  "build": "goose build bench/bench.goose -O2; native CMake Release (-O3 -DNDEBUG with GCC)",
+  "iterations": 200,
+  "runs": 9,
+  "units": "ns per inspect call",
+  "samples": {
+    "small/tight": [
+      25063.655,
+      25079.225,
+      25040.035,
+      25487.53,
+      24745.215,
+      27186.29,
+      25722.855,
+      25231.65,
+      25350.155
+    ],
+    "small/default": [
+      31375.815,
+      58240.225,
+      25995.535,
+      26714.285,
+      27297.26,
+      26763.45,
+      28866.465,
+      51151.465,
+      40897.075
+    ],
+    "small/max": [
+      48163.66,
+      53390.835,
+      48345.51,
+      49623.99,
+      48620.72,
+      48021.44,
+      49129.005,
+      107362.07,
+      58220.45
+    ],
+    "wide/default": [
+      3085131.19,
+      3138585.045,
+      3100086.75,
+      3128786.65,
+      3071146.415,
+      3113279.835,
+      3263752.91,
+      3186535.665,
+      3810528.14
+    ],
+    "large/default": [
+      16373951.185,
+      5680559.92,
+      5676705.115,
+      5573972.4,
+      5718557.135,
+      5696070.215,
+      5682941.805,
+      8072548.47,
+      7376439.465
+    ],
+    "padded/default": [
+      6033234.755,
+      5949782.955,
+      5907533.455,
+      5935512.19,
+      6041171.485,
+      6126929.135,
+      6284099.97,
+      6483987.45,
+      6079598.45
+    ]
+  },
+  "medians": {
+    "small/tight": 25231.65,
+    "small/default": 28866.465,
+    "small/max": 49129.005,
+    "wide/default": 3128786.65,
+    "large/default": 5696070.215,
+    "padded/default": 6041171.485
+  },
+  "checksums": {
+    "large/default": 838861800,
+    "wide/default": 3000000,
+    "small/default": 6000,
+    "small/tight": 6000,
+    "small/max": 6000,
+    "padded/default": 6000
+  },
+  "binary_sha256": {
+    "candidate": "943bbd38aea366de2e0c305a755277e07dd643168632eebb351b79b6d55cb25f",
+    "baseline": "a00ed6c995a858eb8135587e67b3f60b3a0e598549751e91145d67ee076de0e3"
+  },
+  "fixture_sha256": {
+    "small": "6bf6d87f1a5c3ad6984008d1fc293ad2cc9ad2eadb2f91bf31241374e01bf67a",
+    "wide": "3683d2382515d1734d85a4c95e064288b697bd57797367f4925b9f2f58850992",
+    "large": "5d33c31f8814f2e638ef8cbd53707a496bb05c645026e3d24fe3b04a04fd94ef",
+    "padded": "c1a9fba28c5019428c164f1215c35c8fd683badc6bdee9d6abc14df770ae2eed"
+  },
+  "harness_sha256": "8ec1392d9617347b3a2dbb3760f663c153e22b7cbe7e773af5a0a78d1f99dae8",
+  "baseline_revision": "8444042bc822af273011fc4387546e796009eb91",
+  "baseline_samples": {
+    "small/tight": [
+      30033.595,
+      30248.715,
+      31689.955,
+      29245.82,
+      44809.11,
+      30385.81,
+      31215.775,
+      30905.76,
+      35598.43
+    ],
+    "small/default": [
+      33344.835,
+      33673.43,
+      31254.03,
+      31351.055,
+      33577.305,
+      31384.97,
+      34477.225,
+      60229.945,
+      32340.12
+    ],
+    "small/max": [
+      52019.575,
+      54100.54,
+      54607.21,
+      54505.12,
+      54295.275,
+      53044.76,
+      53610.35,
+      72164.81,
+      57914.34
+    ],
+    "wide/default": [
+      3155029.385,
+      3189611.99,
+      3086373.44,
+      3061112.71,
+      3136060.545,
+      3099645.22,
+      3572375.21,
+      3182601.665,
+      3860542.975
+    ],
+    "large/default": [
+      9470789.52,
+      5634343.34,
+      5736946.08,
+      5708546.745,
+      5866429.16,
+      5697669.25,
+      5940094.74,
+      6167292.075,
+      6698143.87
+    ],
+    "padded/default": [
+      7683739.615,
+      7935558.805,
+      7762367.61,
+      7769777.055,
+      7921307.095,
+      7914396.32,
+      7936362.4,
+      8167258.26,
+      8074277.46
+    ]
+  },
+  "baseline_medians": {
+    "small/tight": 30905.76,
+    "small/default": 33344.835,
+    "small/max": 54295.275,
+    "wide/default": 3155029.385,
+    "large/default": 5866429.16,
+    "padded/default": 7921307.095
+  }
+}
