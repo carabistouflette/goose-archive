@@ -1,5 +1,7 @@
 # Paired inspection audit, 2026-11-04
 
+Historical results for the commits named below. See the [current measurement guide](../../README.md) for source currentness, dispersion and comparison limits.
+
 [Raw paired samples and provenance](comparison.json) compare clean candidate
 463a18cb4f6b37d940810216e8a346cd0cbcbf32 against a freshly rebuilt public baseline
 fa0629139705edb5ac5dac4e077536b8ba43c16e. Both use the identical Goose harness,

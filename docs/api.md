@@ -19,7 +19,7 @@ absolute, canonical-component path of 2..4095 bytes: no NUL, empty components,
 accessible; every ancestor is opened with no-follow descriptor traversal. Root
 must not exist. An existing file, directory or symlink is never replaced.
 
-Root and intermediate directories use mode0700. Files use0600, or0700 if the
+Root and intermediate directories use mode 0700. Files use 0600, or 0700 if the
 archive has any execute bit. These are **maximum permissions**, reduced by umask;
 restrictive umasks may make creation/traversal fail. Ownership is the extracting
 process's; archive owners, dates, ACLs, xattrs and special mode bits are ignored.
@@ -44,14 +44,14 @@ has a hard maximum. Zero means no capacity, not unlimited.
 | depth |32|32| Path components |
 | manifest_bytes |1MiB|4MiB| Sum of normalized path bytes +10 per entry, for both APIs |
 
-Paths have at most1024 bytes, accept bytes32..126, and reject backslash, colon,
+Paths have at most 1024 bytes, accept bytes 32..126, and reject backslash, colon,
 absolute prefixes, empty components and `.`/`..`. One directory trailing slash is
 accepted. Duplicate decoded paths and regular files used as ancestors are rejected,
 including out-of-order entries. Implicit directories are allowed.
 
 Decompression allocates `tar_bytes +1` bytes without clearing them; the sentinel
 permits exact cap-boundary detection. Validation allocates entry and sort tables
-proportional to the configured entry cap (roughly4.3MiB at4096), without zeroing
+proportional to the configured entry cap (roughly 4.3 MiB at 4096), without zeroing
 the entire tables. Goose inspection prepares/zeroes at most `manifest_bytes`,
 further bounded by the entry cap and the gzip trailer's advisory decompressed
 size: `min(manifest_bytes, min(entries, ISIZE / 512) * 1034)`. Each tar entry

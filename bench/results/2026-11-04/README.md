@@ -1,5 +1,7 @@
 # Inspection measurement, 2026-11-04
 
+Historical results for the commits named below. See the [current measurement guide](../../README.md) for source currentness, dispersion and comparison limits.
+
 [Raw samples and provenance](inspection.json) were measured on clean commit
 06cf713ad6b80366d312fe5b56697970e92b0030 using200 iterations and7 samples per
 workload, with the exact pinned Goose compiler. This evidence-only commit does
