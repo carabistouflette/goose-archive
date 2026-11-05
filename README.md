@@ -46,9 +46,9 @@ Or use `import archive from "../goose-archive";` for a sibling checkout.
 - `extract(input, destination, limits)` validates the same bytes, then writes a
   fresh absolute destination directory. Its parent must be caller-controlled.
 
-Both return `Status`, with `Error.None` on success. `Limits { .. }` uses defaults:
-16 MiB compressed input, 16 MiB decompressed tar, 4,096 entries, 16 MiB per file
-and total payload, depth 32, and 1 MiB packed manifest. Configurable caps and
+Both return `Status`, with `Error.None` on success. Compressed input has a fixed
+16 MiB cap. `Limits { .. }` defaults to 16 MiB decompressed tar, 4,096 entries,
+16 MiB per file and total payload, depth 32, and 1 MiB packed manifest. Configurable caps and
 exact errors are in the [API reference](docs/api.md).
 
 Paths support printable ASCII only. Unicode filenames, including otherwise
