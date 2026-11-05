@@ -1,5 +1,8 @@
 # Bounded padding scan audit
 
+Historical results for the commits named below. See the [current measurement guide](../../README.md) for source currentness, dispersion and comparison limits.
+The raw report records one Goose binary identity, not a separate baseline compiler-binary identity; comparative ratios have that provenance limitation.
+
 Measured candidate `c4d85defc66ff59227c986069971677e8e0d4abd` against
 `8444042bc822af273011fc4387546e796009eb91` with the same public Goose harness,
 pinned compiler, generated fixtures and native Release flags. The baseline binary
